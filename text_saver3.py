@@ -9,7 +9,6 @@ from telegram.ext import (
     filters
 )
 
-# Setup logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -29,11 +28,9 @@ async def save_to_saved_messages(update: Update, context: ContextTypes.DEFAULT_T
         message = update.message
         timestamp = message.date
         
-        # Initialize metadata
         metadata = []
         text_content = message.text or message.caption or ""
         
-        # Process forwarding info
         if hasattr(message, 'forward_origin') and message.forward_origin:
             origin = message.forward_origin
             if hasattr(origin, 'sender_chat') and origin.sender_chat:
@@ -48,9 +45,7 @@ async def save_to_saved_messages(update: Update, context: ContextTypes.DEFAULT_T
         
         metadata.append(f"Saved at: {message.date.strftime('%Y-%m-%d %H:%M:%S')}")
         
-        # Handle different message types
         if message.photo:
-            # PHOTO HANDLING (saves as JPEG)
             file = await message.photo[-1].get_file()
             filename = f"photo_{timestamp.strftime('%Y%m%d_%H%M%S')}.jpg"
             await file.download_to_drive(filename)
@@ -62,7 +57,6 @@ async def save_to_saved_messages(update: Update, context: ContextTypes.DEFAULT_T
             os.remove(filename)
         
         elif message.document:
-            # DOCUMENT HANDLING (preserves original format)
             file = await message.document.get_file()
             ext = os.path.splitext(message.document.file_name or "file.bin")[1]
             filename = f"doc_{timestamp.strftime('%Y%m%d_%H%M%S')}{ext}"
@@ -74,7 +68,6 @@ async def save_to_saved_messages(update: Update, context: ContextTypes.DEFAULT_T
             )
             os.remove(filename)
         
-        # TEXT HANDLING
         if text_content or (not message.photo and not message.document):
             filename = f"text_{timestamp.strftime('%Y%m%d_%H%M%S')}.txt"
             with open(filename, 'w', encoding='utf-8') as f:
